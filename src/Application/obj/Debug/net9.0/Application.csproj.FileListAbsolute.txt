@@ -13,3 +13,4 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Application\obj\D
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Application\obj\Debug\net9.0\refint\Application.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Application\obj\Debug\net9.0\Application.pdb
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Application\obj\Debug\net9.0\ref\Application.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Application\obj\Debug\net9.0\Application.sourcelink.json

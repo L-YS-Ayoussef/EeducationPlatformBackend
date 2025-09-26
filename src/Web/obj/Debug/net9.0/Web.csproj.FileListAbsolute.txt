@@ -178,3 +178,4 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.pdb
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.genruntimeconfig.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\ref\Web.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.sourcelink.json

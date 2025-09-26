@@ -62,7 +62,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICourseCatalogService, CourseCatalogService>();
-builder.Services.AddScoped<IInstructorService, InstructorService>(); // public catalog (Part 1)
+// builder.Services.AddScoped<IInstructorService, InstructorService>(); // public catalog (Part 1)
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>(); // NEW (Part 2)
 builder.Services.AddScoped<IStudentActionsService, StudentActionsService>();
 
@@ -75,8 +75,6 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-
 // --- Seed on Development ---
 if (app.Environment.IsDevelopment())
 {
@@ -86,4 +84,5 @@ if (app.Environment.IsDevelopment())
     await DbInitializer.SeedAsync(db, hasher);
 }
 
-app.Run();
+app.MapControllers();
+await app.RunAsync();

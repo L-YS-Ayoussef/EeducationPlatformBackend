@@ -17,3 +17,4 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\ob
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.pdb
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.genruntimeconfig.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\ref\Infrastructure.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.sourcelink.json
