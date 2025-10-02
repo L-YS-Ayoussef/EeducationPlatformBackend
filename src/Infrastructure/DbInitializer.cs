@@ -31,7 +31,7 @@ public static class DbInitializer
         var stu1 = new User
         {
             Id = Guid.NewGuid(), Email = "student1@example.com",
-            PasswordHash = hasher.Hash("P@ssw0rd!"), FirstName = "يوسف", LastName = "علاء",
+            PasswordHash = hasher.Hash("P@ssw0rd!"), FirstName = "محمد", LastName = "عزيز",
             AccountType = AccountType.Student, CreatedAt = now, UpdatedAt = now
         };
 
