@@ -2,13 +2,15 @@ using Application.Dtos;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Domain.Entities;
+using Domain.Enums;
 
 namespace Infrastructure.Services;
 
 public interface ICourseCatalogService
 {
     Task<PagedResult<CourseListItemDto>> QueryAsync(CourseQuery query);
-    Task<CourseDetailsDto?> GetBySlugAsync(string slug);
+    Task<CourseDetailsDto?> GetBySlugAsync(string slug, Guid? studentId = null);
 }
 public interface IInstructorService
 {
@@ -55,7 +57,7 @@ public class CourseCatalogService : ICourseCatalogService
         return new PagedResult<CourseListItemDto>(items, total, q.Page, q.PageSize);
     }
 
-    public async Task<CourseDetailsDto?> GetBySlugAsync(string slug)
+    public async Task<CourseDetailsDto?> GetBySlugAsync(string slug, Guid? studentId = null)
     {
         var course = await _db.Courses.AsNoTracking()
             .Include(c => c.Instructor)
@@ -63,77 +65,95 @@ public class CourseCatalogService : ICourseCatalogService
             .Include(c => c.Faqs)
             .SingleOrDefaultAsync(c => c.Slug == slug);
 
-        return course is null ? null : _mapper.Map<CourseDetailsDto>(course);
+        if (course is null) return null;
+
+        var dto = _mapper.Map<CourseDetailsDto>(course);
+
+        if (studentId.HasValue)
+        {
+            dto.IsEnrolled = await _db.CoursesStudents.AsNoTracking()
+                .AnyAsync(e => e.CourseId == course.Id && e.StudentId == studentId.Value);
+            // (optional) Only count active:
+            // .AnyAsync(e => e.CourseId == course.Id && e.StudentId == studentId.Value && e.Status == "active");
+        }
+
+        return dto;
     }
 }
 
 public class InstructorService : IInstructorService
 {
     private readonly AppDbContext _db;
-    private readonly IMapper _mapper;
-    public InstructorService(AppDbContext db, IMapper mapper){ _db=db; _mapper=mapper; }
+    public InstructorService(AppDbContext db) => _db = db;
 
     public async Task<PagedResult<InstructorListItemDto>> QueryAsync(InstructorQuery q)
     {
-        var ins = _db.Users.AsNoTracking().Where(u => u.Courses.Any());
+        // only real instructors with at least 1 course
+        var ins = _db.Users.AsNoTracking()
+            .Where(u => u.AccountType == AccountType.Instructor && u.Courses.Any());
 
-        if (!string.IsNullOrWhiteSpace(q.Q))
-            ins = ins.Where(u => EF.Functions.Like(u.FirstName, $"%{q.Q}%") || EF.Functions.Like(u.LastName, $"%{q.Q}%") || EF.Functions.Like(u.Bio ?? "", $"%{q.Q}%"));
-
-        // category & language -> from courses taught
-        if (!string.IsNullOrWhiteSpace(q.Category))
-            ins = ins.Where(u => u.Courses.Any(c => c.Category == q.Category));
-        if (!string.IsNullOrWhiteSpace(q.Language))
-            ins = ins.Where(u => u.Courses.Any(c => c.Language == q.Language));
-
-        // minRating -> avg of their courses
+        // Project to DTO using SQL-translatable expressions
         var query = ins.Select(u => new InstructorListItemDto
         {
             Id = u.Id,
-            FirstName = u.FirstName,
-            LastName = u.LastName,
+            // compute a username string the same way you expose it in the API, but SQL-friendly:
+            Username = (u.FirstName + "-" + u.LastName),   // keep it simple; add .ToLower() if your API expects lower
             Title = u.Title,
             Bio = u.Bio,
-            Username = u.Username,
+            Email = u.Email,
+            AvatarUrl = u.AvatarUrl,
             RatingAvg = u.Courses.Any() ? u.Courses.Average(c => c.RatingAvg) : 0,
             CoursesCount = u.Courses.Count
         });
 
-        if (q.MinRating.HasValue) query = query.Where(x => x.RatingAvg >= q.MinRating.Value);
-
-        query = q.Sort switch
-        {
-            "top"     => query.OrderByDescending(x => x.RatingAvg),
-            "popular" => query.OrderByDescending(x => x.CoursesCount),
-            "newest"  => query.OrderByDescending(x => x.Id), // naive
-            _         => query.OrderByDescending(x => x.RatingAvg)
-        };
-
         var total = await query.CountAsync();
-        var items = await query.Skip((q.Page-1)*q.PageSize).Take(q.PageSize).ToListAsync();
+
+        // Use ORDER BY on fields that EF can translate (e.g., CoursesCount then FirstName/LastName)
+        var items = await query
+            .OrderByDescending(x => x.CoursesCount)
+            .ThenBy(x => x.Username) // safe now because it's computed inside the projection (SQL concat)
+            .Skip((q.Page - 1) * q.PageSize)
+            .Take(q.PageSize)
+            .ToListAsync();
+
         return new PagedResult<InstructorListItemDto>(items, total, q.Page, q.PageSize);
     }
 
     public async Task<InstructorDetailsDto?> GetByUsernameAsync(string username)
     {
+        // Normalize to lower if your frontend uses lower-case usernames
+        var uname = username.ToLower();
+
         var u = await _db.Users.AsNoTracking()
             .Include(x => x.Courses)
-            .SingleOrDefaultAsync(x => x.Username == username);
+            .Where(x => x.AccountType == AccountType.Instructor)
+            // Compare with the same expression you use to build username on the fly:
+            .SingleOrDefaultAsync(x =>
+                (x.FirstName + "-" + x.LastName).ToLower() == uname);
+
         if (u is null) return null;
 
         return new InstructorDetailsDto
         {
             Id = u.Id,
-            FirstName = u.FirstName,
-            LastName = u.LastName,
             Title = u.Title,
             Bio = u.Bio,
-            Username = u.Username,
+            Username = (u.FirstName + "-" + u.LastName), // return the same computed username
+            Email = u.Email,
+            Phone = u.Phone,
+            AvatarUrl = u.AvatarUrl,
             RatingAvg = u.Courses.Any() ? u.Courses.Average(c => c.RatingAvg) : 0,
+            CoursesCount = u.Courses.Count,
+            CreatedAt = u.CreatedAt,
             Courses = u.Courses.Select(c => new CourseListItemDto
             {
-                Id = c.Id, Title = c.Title, Slug = c.Slug, Price = c.Price,
-                ThumbnailUrl = c.ThumbnailUrl, RatingAvg = c.RatingAvg, ReviewsCount = c.ReviewsCount,
+                Id = c.Id,
+                Title = c.Title,
+                Slug = c.Slug,
+                Price = c.Price,
+                ThumbnailUrl = c.ThumbnailUrl,
+                RatingAvg = c.RatingAvg,
+                ReviewsCount = c.ReviewsCount,
                 InstructorName = u.FirstName + " " + u.LastName
             }).ToList()
         };

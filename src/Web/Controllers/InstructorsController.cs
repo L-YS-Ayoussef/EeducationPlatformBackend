@@ -17,10 +17,7 @@ public class InstructorsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<PagedResult<InstructorListItemDto>>> List([FromQuery] InstructorQuery q)
-    {
-        var result = await _svc.QueryAsync(q);
-        return Ok(result);
-    }
+        => Ok(await _svc.QueryAsync(q));
 
     [HttpGet("{username}")]
     public async Task<ActionResult<InstructorDetailsDto>> Get(string username)

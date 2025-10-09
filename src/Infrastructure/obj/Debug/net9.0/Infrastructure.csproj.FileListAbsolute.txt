@@ -11,10 +11,10 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\ob
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfoInputs.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfo.cs
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.sourcelink.json
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastr.15EFFBFE.Up2Date
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\refint\Infrastructure.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.pdb
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.genruntimeconfig.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\ref\Infrastructure.dll
-C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Infrastructure\obj\Debug\net9.0\Infrastructure.sourcelink.json

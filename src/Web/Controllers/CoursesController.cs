@@ -16,9 +16,9 @@ public class CoursesController : ControllerBase
         => Ok(await _svc.QueryAsync(q));
 
     [HttpGet("{slug}")]
-    public async Task<ActionResult<CourseDetailsDto>> GetBySlug(string slug)
+    public async Task<ActionResult<CourseDetailsDto>> GetBySlug(string slug, [FromQuery] Guid? studentId = null)
     {
-        var dto = await _svc.GetBySlugAsync(slug);
+        var dto = await _svc.GetBySlugAsync(slug, studentId);
         return dto is null ? NotFound() : Ok(dto);
     }
 }

@@ -10,6 +10,7 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Azure.Core.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Azure.Identity.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\BCrypt.Net-Next.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\FluentValidation.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\FluentValidation.AspNetCore.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\FluentValidation.DependencyInjectionExtensions.dll
@@ -17,6 +18,7 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Isopoh.Cryptography.Argon2.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Isopoh.Cryptography.Blake2b.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Isopoh.Cryptography.SecureArray.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\MailKit.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -54,6 +56,7 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.OpenApi.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\MimeKit.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Mono.TextTemplating.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
@@ -164,6 +167,7 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.csproj.CoreCompileInputs.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.sourcelink.json
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
@@ -178,4 +182,3 @@ C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.pdb
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.genruntimeconfig.cache
 C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\ref\Web.dll
-C:\Users\ABC 2022\Desktop\EeducationPlatform\arabic-elearn\src\Web\obj\Debug\net9.0\Web.sourcelink.json

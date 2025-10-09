@@ -72,8 +72,38 @@ public class AccountService : IAccountService
 
     public async Task<UserDto> GetCurrentAsync(Guid userId)
     {
-        var u = await _db.Users.FindAsync(userId) ?? throw new KeyNotFoundException();
-        return _mapper.Map<UserDto>(u);
+        var u = await _db.Users.AsNoTracking().SingleOrDefaultAsync(x => x.Id == userId)
+                ?? throw new KeyNotFoundException();
+
+        var dto = _mapper.Map<UserDto>(u);
+
+        // Student enrollments
+        dto.EnrolledCourses = await (
+            from e in _db.CoursesStudents.AsNoTracking()
+            join c in _db.Courses.AsNoTracking() on e.CourseId equals c.Id
+            where e.StudentId == userId
+            select new CourseBriefDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Slug = c.Slug,
+                ShortDescription = c.ShortDescription,
+                ThumbnailUrl = c.ThumbnailUrl
+            }).ToListAsync();
+
+        // Instructor’s courses
+        dto.TeachingCourses = await _db.Courses.AsNoTracking()
+            .Where(c => c.InstructorId == userId)
+            .Select(c => new CourseBriefDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Slug = c.Slug,
+                ShortDescription = c.ShortDescription,
+                ThumbnailUrl = c.ThumbnailUrl
+            }).ToListAsync();
+
+        return dto;
     }
 
     public async Task<UserDto> UpdateStudentProfileAsync(Guid userId, UpdateProfileDto dto)

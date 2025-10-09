@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<CourseStudent> CoursesStudents => Set<CourseStudent>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Faq> FAQ => Set<Faq>();
+    public DbSet<EmailCode> EmailCodes => Set<EmailCode>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -86,7 +87,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Title).IsRequired().HasMaxLength(250);
             e.Property(x => x.Description).IsRequired().HasMaxLength(2000);
             e.Property(x => x.MaxScore).HasColumnType("decimal(5,2)");
-            e.HasOne(x => x.Section).WithMany(s => s.Assignments).HasForeignKey(x => x.SectionId);
+            e.HasOne(x => x.Lesson).WithMany(l => l.Assignments).HasForeignKey(x => x.LessonId);
         });
 
         // Attachments (submissions)
@@ -126,6 +127,16 @@ public class AppDbContext : DbContext
             e.Property(x => x.Question).IsRequired().HasMaxLength(500);
             e.Property(x => x.Answer).IsRequired().HasMaxLength(2000);
             e.HasOne(x => x.Course).WithMany(c => c.Faqs).HasForeignKey(x => x.CourseId);
+        });
+
+        // EmailCodes
+        b.Entity<EmailCode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Email).IsRequired().HasMaxLength(256);
+            e.Property(x => x.Purpose).IsRequired().HasMaxLength(50);
+            e.Property(x => x.CodeHash).IsRequired().HasMaxLength(128);
+            e.HasIndex(x => new { x.Email, x.Purpose });
         });
     }
 }

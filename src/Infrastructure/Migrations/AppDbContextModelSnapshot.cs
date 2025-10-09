@@ -39,15 +39,15 @@ namespace Infrastructure.Migrations
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<int>("LessonId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("MaxScore")
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("PdfUrl")
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SectionId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -57,7 +57,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SectionId");
+                    b.HasIndex("LessonId");
 
                     b.ToTable("Assignments");
                 });
@@ -118,6 +118,10 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CourseImage")
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -220,6 +224,51 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("CoursesStudents");
+                });
+
+            modelBuilder.Entity("Domain.Entities.EmailCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("ConsumedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email", "Purpose");
+
+                    b.ToTable("EmailCodes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Faq", b =>
@@ -425,13 +474,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Assignment", b =>
                 {
-                    b.HasOne("Domain.Entities.Section", "Section")
+                    b.HasOne("Domain.Entities.Lesson", "Lesson")
                         .WithMany("Assignments")
-                        .HasForeignKey("SectionId")
+                        .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Section");
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("Domain.Entities.Attachment", b =>
@@ -551,10 +600,13 @@ namespace Infrastructure.Migrations
                     b.Navigation("Sections");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Section", b =>
+            modelBuilder.Entity("Domain.Entities.Lesson", b =>
                 {
                     b.Navigation("Assignments");
+                });
 
+            modelBuilder.Entity("Domain.Entities.Section", b =>
+                {
                     b.Navigation("Lessons");
                 });
 

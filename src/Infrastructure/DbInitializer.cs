@@ -28,14 +28,8 @@ public static class DbInitializer
             AccountType = AccountType.Instructor, Title = "خبيرة علوم بيانات", Bio = "متخصصة تعلم آلي",
             CreatedAt = now, UpdatedAt = now
         };
-        var stu1 = new User
-        {
-            Id = Guid.NewGuid(), Email = "student1@example.com",
-            PasswordHash = hasher.Hash("P@ssw0rd!"), FirstName = "محمد", LastName = "عزيز",
-            AccountType = AccountType.Student, CreatedAt = now, UpdatedAt = now
-        };
 
-        db.Users.AddRange(ins1, ins2, stu1);
+        db.Users.AddRange(ins1, ins2);
 
         var c1 = new Course
         {
@@ -51,9 +45,6 @@ public static class DbInitializer
                     Lessons = new List<Lesson>{
                         new Lesson{ Title="ما هي بايثون؟", Description="تعريف", VideoUrl=null }
                     },
-                    Assignments = new List<Assignment>{
-                        new Assignment{ AssignmentNumber=1, Title="واجب 1", Description="أسئلة بسيطة", MaxScore=100 }
-                    }
                 }
             },
             Faqs = new List<Faq>{
@@ -75,18 +66,11 @@ public static class DbInitializer
                     Lessons = new List<Lesson>{
                         new Lesson{ Title="أنواع التعلم", Description="مشرف وغير مشرف", VideoUrl=null }
                     },
-                    Assignments = new List<Assignment>{
-                        new Assignment{ AssignmentNumber=1, Title="مصطلحات", Description="تعريفات", MaxScore=100 }
-                    }
                 }
             }
         };
 
         db.Courses.AddRange(c1, c2);
-
-        db.CoursesStudents.Add(new CourseStudent { StudentId = stu1.Id, CourseId = c1.Id, Status = "active", EnrolledAt = now });
-
-        db.Reviews.Add(new Review { CourseId = c1.Id, StudentId = stu1.Id, ReviewContent = "دورة رائعة", Rate = 5, CreatedAt = now });
 
         await db.SaveChangesAsync();
     }
