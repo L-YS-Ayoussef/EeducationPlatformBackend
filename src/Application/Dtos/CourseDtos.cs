@@ -5,6 +5,9 @@ public class CourseListItemDto
     public Guid Id { get; set; }
     public string Title { get; set; } = default!;
     public string Slug { get; set; } = default!;
+    public string ShortDescription { get; set; } = default!;
+    public string Level { get; set; } = default!;        
+    public int DurationHours { get; set; }                 
     public string? ThumbnailUrl { get; set; }
     public decimal Price { get; set; }
     public decimal RatingAvg { get; set; }
@@ -32,6 +35,7 @@ public class CourseDetailsDto
     public InstructorSummaryDto Instructor { get; set; } = default!;
     public List<SectionDto> Sections { get; set; } = new();
     public List<FaqDto> Faqs { get; set; } = new();
+    public bool IsEnrolled { get; set; }
 }
 public class SectionDto
 {
@@ -58,7 +62,9 @@ public class FaqDto
 public class InstructorSummaryDto
 {
     public Guid Id { get; set; }
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
+    public string Username { get; set; } = default!;
     public string? Title { get; set; }
+    public string? Bio { get; set; }
+    public string Email { get; set; } = default!;
+    public string? AvatarUrl { get; set; }
 }

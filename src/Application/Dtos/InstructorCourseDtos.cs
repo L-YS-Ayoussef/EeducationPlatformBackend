@@ -23,7 +23,6 @@ public class SectionCreateDto
     public string ShortDescription { get; set; } = default!;
     public string Description { get; set; } = default!;
     public List<LessonCreateDto> Lessons { get; set; } = new();
-    public List<AssignmentCreateDto> Assignments { get; set; } = new();
 }
 
 public class LessonCreateDto
@@ -31,6 +30,7 @@ public class LessonCreateDto
     public string Title { get; set; } = default!;
     public string Description { get; set; } = default!;
     public string? VideoUrl { get; set; }
+    public List<AssignmentCreateDto> Assignments { get; set; } = new();
 }
 
 public class AssignmentCreateDto
@@ -52,11 +52,11 @@ public class SectionUpdateDto : SectionCreateDto
 {
     public int? Id { get; set; }
     public new List<LessonUpdateDto> Lessons { get; set; } = new();
-    public new List<AssignmentUpdateDto> Assignments { get; set; } = new();
 }
 public class LessonUpdateDto : LessonCreateDto
 {
     public int? Id { get; set; }
+    public new List<AssignmentUpdateDto> Assignments { get; set; } = new();
 }
 public class AssignmentUpdateDto : AssignmentCreateDto
 {

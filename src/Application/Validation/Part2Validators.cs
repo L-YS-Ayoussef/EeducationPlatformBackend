@@ -19,6 +19,7 @@ public class CourseCreateDtoValidator : AbstractValidator<CourseCreateDto>
         RuleForEach(x => x.Sections).SetValidator(new SectionCreateDtoValidator());
     }
 }
+
 public class SectionCreateDtoValidator : AbstractValidator<SectionCreateDto>
 {
     public SectionCreateDtoValidator()
@@ -27,17 +28,20 @@ public class SectionCreateDtoValidator : AbstractValidator<SectionCreateDto>
         RuleFor(x => x.ShortDescription).NotEmpty().MaximumLength(500);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(4000);
         RuleForEach(x => x.Lessons).SetValidator(new LessonCreateDtoValidator());
-        RuleForEach(x => x.Assignments).SetValidator(new AssignmentCreateDtoValidator());
+        // Assignments moved under Lesson → no validation here
     }
 }
+
 public class LessonCreateDtoValidator : AbstractValidator<LessonCreateDto>
 {
     public LessonCreateDtoValidator()
     {
         RuleFor(x => x.Title).NotEmpty().MaximumLength(250);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(2000);
+        RuleForEach(x => x.Assignments).SetValidator(new AssignmentCreateDtoValidator());
     }
 }
+
 public class AssignmentCreateDtoValidator : AbstractValidator<AssignmentCreateDto>
 {
     public AssignmentCreateDtoValidator()
@@ -48,6 +52,7 @@ public class AssignmentCreateDtoValidator : AbstractValidator<AssignmentCreateDt
         RuleFor(x => x.MaxScore).InclusiveBetween(1, 1000);
     }
 }
+
 public class CourseUpdateDtoValidator : AbstractValidator<CourseUpdateDto>
 {
     public CourseUpdateDtoValidator()
@@ -56,28 +61,42 @@ public class CourseUpdateDtoValidator : AbstractValidator<CourseUpdateDto>
         RuleForEach(x => x.Sections).SetValidator(new SectionUpdateDtoValidator());
     }
 }
+
 public class SectionUpdateDtoValidator : AbstractValidator<SectionUpdateDto>
 {
     public SectionUpdateDtoValidator()
     {
         Include(new SectionCreateDtoValidator());
         RuleForEach(x => x.Lessons).SetValidator(new LessonUpdateDtoValidator());
+        // Assignments moved under Lesson → no validation here
+    }
+}
+
+public class LessonUpdateDtoValidator : AbstractValidator<LessonUpdateDto>
+{
+    public LessonUpdateDtoValidator()
+    {
+        Include(new LessonCreateDtoValidator());
         RuleForEach(x => x.Assignments).SetValidator(new AssignmentUpdateDtoValidator());
     }
 }
-public class LessonUpdateDtoValidator : AbstractValidator<LessonUpdateDto>
-{
-    public LessonUpdateDtoValidator() => Include(new LessonCreateDtoValidator());
-}
+
 public class AssignmentUpdateDtoValidator : AbstractValidator<AssignmentUpdateDto>
 {
-    public AssignmentUpdateDtoValidator() => Include(new AssignmentCreateDtoValidator());
+    public AssignmentUpdateDtoValidator()
+    {
+        Include(new AssignmentCreateDtoValidator());
+    }
 }
 
 public class EnrollRequestDtoValidator : AbstractValidator<EnrollRequestDto>
 {
-    public EnrollRequestDtoValidator() => RuleFor(x => x.CourseId).NotEmpty();
+    public EnrollRequestDtoValidator()
+    {
+        RuleFor(x => x.CourseId).NotEmpty();
+    }
 }
+
 public class ReviewCreateDtoValidator : AbstractValidator<ReviewCreateDto>
 {
     public ReviewCreateDtoValidator()
@@ -87,6 +106,7 @@ public class ReviewCreateDtoValidator : AbstractValidator<ReviewCreateDto>
         RuleFor(x => x.Rate).InclusiveBetween((byte)1, (byte)5);
     }
 }
+
 public class StudentAttachmentCreateDtoValidator : AbstractValidator<StudentAttachmentCreateDto>
 {
     public StudentAttachmentCreateDtoValidator()
@@ -96,7 +116,11 @@ public class StudentAttachmentCreateDtoValidator : AbstractValidator<StudentAtta
         RuleFor(x => x.Description).NotEmpty().MaximumLength(2000);
     }
 }
+
 public class GradeUpdateDtoValidator : AbstractValidator<GradeUpdateDto>
 {
-    public GradeUpdateDtoValidator() => RuleFor(x => x.Grade).GreaterThanOrEqualTo(0);
+    public GradeUpdateDtoValidator()
+    {
+        RuleFor(x => x.Grade).GreaterThanOrEqualTo(0);
+    }
 }

@@ -62,10 +62,13 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICourseCatalogService, CourseCatalogService>();
-// builder.Services.AddScoped<IInstructorService, InstructorService>(); // public catalog (Part 1)
+builder.Services.AddScoped<IInstructorService, InstructorService>(); // public catalog (Part 1)
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>(); // NEW (Part 2)
 builder.Services.AddScoped<IStudentActionsService, StudentActionsService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IVerificationCodeService, VerificationCodeService>();
 
 var app = builder.Build();
 

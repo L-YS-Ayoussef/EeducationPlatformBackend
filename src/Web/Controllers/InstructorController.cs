@@ -34,6 +34,7 @@ public class InstructorController : ControllerBase
         return Ok(res);
     }
 
+    // ****************************
     [HttpGet("courses")]
     public async Task<ActionResult<PagedResult<CourseListItemDto>>> MyCourses([FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         => Ok(await _svc.ListOwnedCoursesAsync(UserId, page, pageSize));
@@ -41,6 +42,7 @@ public class InstructorController : ControllerBase
     [HttpGet("courses/{id:guid}")]
     public async Task<ActionResult<CourseDetailsDto>> MyCourse(Guid id)
         => Ok(await _svc.GetOwnedCourseAsync(UserId, id));
+    // ****************************
 
     [HttpGet("courses/{id:guid}/students")]
     public async Task<ActionResult<List<EnrollmentStudentDto>>> EnrolledStudents(Guid id)
@@ -51,6 +53,13 @@ public class InstructorController : ControllerBase
     {
         new GradeUpdateDtoValidator().ValidateAndThrow(dto);
         await _svc.GradeAttachmentAsync(UserId, attachmentId, dto.Grade);
+        return NoContent();
+    }
+
+    [HttpDelete("courses/{id:guid}")]
+    public async Task<IActionResult> DeleteCourse(Guid id)
+    {
+        await _svc.DeleteCourseAsync(UserId, id);
         return NoContent();
     }
 }

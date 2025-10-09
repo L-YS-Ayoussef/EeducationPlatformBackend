@@ -2,8 +2,8 @@ namespace Domain.Entities;
 public class Assignment
 {
     public int Id { get; set; }
-    public int SectionId { get; set; }
-    public Section Section { get; set; } = default!;
+    public int LessonId { get; set; }
+    public Lesson Lesson { get; set; } = default!;
     public int AssignmentNumber { get; set; }
     public string Title { get; set; } = default!;
     public string Description { get; set; } = default!;

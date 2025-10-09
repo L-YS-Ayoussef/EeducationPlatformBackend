@@ -18,6 +18,7 @@ public class Course
     public int ReviewsCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string? CourseImage { get; set; }
 
     public Guid InstructorId { get; set; }
     public User Instructor { get; set; } = default!;

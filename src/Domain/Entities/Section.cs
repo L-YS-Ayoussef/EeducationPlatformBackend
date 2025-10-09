@@ -8,5 +8,4 @@ public class Section
     public string ShortDescription { get; set; } = default!;
     public string Description { get; set; } = default!;
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
-    public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 }
