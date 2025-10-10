@@ -8,10 +8,16 @@ namespace Infrastructure.Services;
 
 public interface IInstructorDashboardService
 {
-    Task<CourseDetailsDto> CreateCourseAsync(Guid instructorId, CourseCreateDto dto);
-    Task<CourseDetailsDto> UpdateCourseAsync(Guid instructorId, Guid courseId, CourseUpdateDto dto);
-    Task<PagedResult<CourseListItemDto>> ListOwnedCoursesAsync(Guid instructorId, int page, int pageSize);
     Task<CourseDetailsDto> GetOwnedCourseAsync(Guid instructorId, Guid courseId);
+    Task<CourseDetailsDto> CreateCourseSimpleAsync(Guid instructorId, CourseSimpleUpsertDto dto);
+    Task<CourseDetailsDto> UpdateCourseSimpleAsync(Guid instructorId, Guid courseId, CourseSimpleUpsertDto dto);
+
+    Task<SectionDtoSimple> CreateSectionAsync(Guid instructorId, Guid courseId, SectionUpsertDto dto);
+    Task<SectionDtoSimple> UpdateSectionAsync(Guid instructorId, int sectionId, SectionUpsertDto dto);
+
+    Task<LessonDtoSimple> CreateLessonAsync(Guid instructorId, int sectionId, LessonUpsertDto dto);
+    Task<LessonDtoSimple> UpdateLessonAsync(Guid instructorId, int lessonId, LessonUpsertDto dto);
+
     Task<List<EnrollmentStudentDto>> GetOwnedCourseStudentsAsync(Guid instructorId, Guid courseId);
     Task GradeAttachmentAsync(Guid instructorId, int attachmentId, decimal grade);
     Task DeleteCourseAsync(Guid instructorId, Guid courseId);
@@ -22,173 +28,20 @@ public class InstructorDashboardService : IInstructorDashboardService
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
 
+    // ------------- helpers -------------
     public InstructorDashboardService(AppDbContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;
     }
 
-    public async Task<CourseDetailsDto> CreateCourseAsync(Guid instructorId, CourseCreateDto dto)
-    {
-        if (await _db.Courses.AnyAsync(c => c.Slug == dto.Slug))
-            throw new InvalidOperationException("Slug already exists.");
-
-        var now = DateTime.UtcNow;
-        var course = _mapper.Map<Course>(dto);
-        course.Id = Guid.NewGuid();
-        course.InstructorId = instructorId;
-        course.CreatedAt = now;
-        course.UpdatedAt = now;
-        course.RatingAvg = 0;
-        course.ReviewsCount = 0;
-
-        _db.Courses.Add(course);
-        await _db.SaveChangesAsync();
-        return await GetOwnedCourseAsync(instructorId, course.Id);
-    }
-
-    public async Task<CourseDetailsDto> UpdateCourseAsync(Guid instructorId, Guid courseId, CourseUpdateDto dto)
-    {
-        var course = await _db.Courses
-            .Include(c => c.Sections)
-                .ThenInclude(s => s.Lessons)
-                    .ThenInclude(l => l.Assignments)
-            .SingleOrDefaultAsync(c => c.Id == courseId);
-
-        if (course is null) throw new KeyNotFoundException("Course not found.");
-        if (course.InstructorId != instructorId) throw new UnauthorizedAccessException();
-
-        // Scalars
-        course.Title = dto.Title;
-        course.Slug = dto.Slug;
-        course.ShortDescription = dto.ShortDescription;
-        course.Description = dto.Description;
-        course.Category = dto.Category;
-        course.Level = dto.Level;
-        course.Language = dto.Language;
-        course.Instructions = dto.Instructions;
-        course.Price = dto.Price;
-        course.DurationHours = dto.DurationHours;
-        course.ThumbnailUrl = dto.ThumbnailUrl;
-        course.PublishedAt = dto.PublishedAt;
-        course.UpdatedAt = DateTime.UtcNow;
-
-        // --- Sync Sections (add/update/delete) ---
-        var incomingSectionIds = dto.Sections.Where(s => s.Id.HasValue).Select(s => s.Id!.Value).ToHashSet();
-
-        // delete removed sections
-        course.Sections.RemoveWhere(s => !incomingSectionIds.Contains(s.Id) && dto.Sections.Any());
-
-        // upsert sections
-        foreach (var sDto in dto.Sections)
-        {
-            Section sEntity;
-            if (sDto.Id.HasValue)
-            {
-                sEntity = course.Sections.Single(s => s.Id == sDto.Id);
-                sEntity.Title = sDto.Title;
-                sEntity.ShortDescription = sDto.ShortDescription;
-                sEntity.Description = sDto.Description;
-            }
-            else
-            {
-                sEntity = new Section
-                {
-                    Title = sDto.Title,
-                    ShortDescription = sDto.ShortDescription,
-                    Description = sDto.Description
-                };
-                course.Sections.Add(sEntity);
-            }
-
-            // --- Sync Lessons under the section ---
-            var incLessonIds = sDto.Lessons.Where(l => l.Id.HasValue).Select(l => l.Id!.Value).ToHashSet();
-
-            // delete removed lessons
-            sEntity.Lessons.RemoveWhere(l => !incLessonIds.Contains(l.Id) && sDto.Lessons.Any());
-
-            // upsert lessons
-            foreach (var lDto in sDto.Lessons)
-            {
-                Lesson lEntity;
-                if (lDto.Id.HasValue)
-                {
-                    lEntity = sEntity.Lessons.Single(x => x.Id == lDto.Id);
-                    lEntity.Title = lDto.Title;
-                    lEntity.Description = lDto.Description;
-                    lEntity.VideoUrl = lDto.VideoUrl;
-                }
-                else
-                {
-                    lEntity = new Lesson
-                    {
-                        Title = lDto.Title,
-                        Description = lDto.Description,
-                        VideoUrl = lDto.VideoUrl
-                    };
-                    sEntity.Lessons.Add(lEntity);
-                }
-
-                // --- Sync Assignments under the lesson (moved from section -> lesson) ---
-                // Assumes your LessonUpdateDto / LessonCreateDto has a property: List<AssignmentUpdateDto/AssignmentCreateDto> Assignments
-                var lDtoAssignments = lDto.Assignments ?? new List<AssignmentUpdateDto>();
-                var incAssIds = lDtoAssignments.Where(a => a.Id.HasValue).Select(a => a.Id!.Value).ToHashSet();
-
-                // delete removed assignments
-                lEntity.Assignments.RemoveWhere(a => !incAssIds.Contains(a.Id) && lDtoAssignments.Any());
-
-                // upsert assignments
-                foreach (var aDto in lDtoAssignments)
-                {
-                    if (aDto.Id.HasValue)
-                    {
-                        var a = lEntity.Assignments.Single(x => x.Id == aDto.Id);
-                        a.AssignmentNumber = aDto.AssignmentNumber;
-                        a.Title = aDto.Title;
-                        a.Description = aDto.Description;
-                        a.PdfUrl = aDto.PdfUrl;
-                        a.MaxScore = aDto.MaxScore;
-                    }
-                    else
-                    {
-                        lEntity.Assignments.Add(new Assignment
-                        {
-                            AssignmentNumber = aDto.AssignmentNumber,
-                            Title = aDto.Title,
-                            Description = aDto.Description,
-                            PdfUrl = aDto.PdfUrl,
-                            MaxScore = aDto.MaxScore
-                        });
-                    }
-                }
-            }
-        }
-
-        await _db.SaveChangesAsync();
-        return await GetOwnedCourseAsync(instructorId, course.Id);
-    }
-
-    // ****************************
-    public async Task<PagedResult<CourseListItemDto>> ListOwnedCoursesAsync(Guid instructorId, int page, int pageSize)
-    {
-        var q = _db.Courses.AsNoTracking().Where(c => c.InstructorId == instructorId)
-            .OrderByDescending(c => c.CreatedAt);
-
-        var total = await q.CountAsync();
-        var items = await q.Skip((page - 1) * pageSize)
-                           .Take(pageSize)
-                           .ProjectTo<CourseListItemDto>(_mapper.ConfigurationProvider)
-                           .ToListAsync();
-
-        return new PagedResult<CourseListItemDto>(items, total, page, pageSize);
-    }
-
-    // ****************************
     public async Task<CourseDetailsDto> GetOwnedCourseAsync(Guid instructorId, Guid courseId)
     {
         var course = await _db.Courses.AsNoTracking()
             .Include(c => c.Instructor)
-            .Include(c => c.Sections).ThenInclude(s => s.Lessons)
+            .Include(c => c.Sections)
+                .ThenInclude(s => s.Lessons)
+                    .ThenInclude(l => l.Assignments) // assignments are under lessons now
             .Include(c => c.Faqs)
             .SingleOrDefaultAsync(c => c.Id == courseId);
 
@@ -198,6 +51,184 @@ public class InstructorDashboardService : IInstructorDashboardService
         return _mapper.Map<CourseDetailsDto>(course);
     }
 
+    // ------------- Course Creation -------------
+    public async Task<CourseDetailsDto> CreateCourseSimpleAsync(Guid instructorId, CourseSimpleUpsertDto dto)
+    {
+        var now = DateTime.UtcNow;
+        var course = new Course
+        {
+            Id = Guid.NewGuid(),
+            InstructorId = instructorId,
+            Title = dto.Title,
+            Slug = MakeSlug(dto.Title),
+            ShortDescription = dto.ShortDescription,
+            Description = dto.Description,
+            Category = dto.Category,
+            Level = dto.Level,
+            Language = dto.Language,
+            Instructions = "",        // empty for simple endpoint
+            Price = dto.Price,
+            DurationHours = dto.DurationHours,
+            ThumbnailUrl = dto.ThumbnailUrl,
+            CreatedAt = now,
+            UpdatedAt = now,
+            RatingAvg = 0,
+            ReviewsCount = 0
+        };
+
+        if (dto.Faqs is not null && dto.Faqs.Count > 0)
+        {
+            foreach (var f in dto.Faqs)
+                course.Faqs.Add(new Faq { Question = f.Question, Answer = f.Answer });
+        }
+
+        _db.Courses.Add(course);
+        await _db.SaveChangesAsync();
+        return await GetOwnedCourseAsync(instructorId, course.Id);
+    }
+
+    private static string MakeSlug(string title)
+    {
+        // super-simple slug (replace spaces). Replace with your existing slugger if you have one.
+        return title.Trim().ToLowerInvariant().Replace(' ', '-');
+    }
+    
+    public async Task<CourseDetailsDto> UpdateCourseSimpleAsync(Guid instructorId, Guid courseId, CourseSimpleUpsertDto dto)
+    {
+        var c = await _db.Courses
+            .Include(x => x.Faqs)
+            .SingleOrDefaultAsync(x => x.Id == courseId)
+            ?? throw new KeyNotFoundException("Course not found.");
+
+        if (c.InstructorId != instructorId) throw new UnauthorizedAccessException();
+
+        c.Title = dto.Title;
+        c.Slug = MakeSlug(dto.Title); // keep slugs derived (or keep old if you prefer)
+        c.ShortDescription = dto.ShortDescription;
+        c.Description = dto.Description;
+        c.Category = dto.Category;
+        c.Level = dto.Level;
+        c.Language = dto.Language;
+        c.Price = dto.Price;
+        c.DurationHours = dto.DurationHours;
+        c.ThumbnailUrl = dto.ThumbnailUrl;
+        c.UpdatedAt = DateTime.UtcNow;
+
+        // Replace FAQs safely
+        c.Faqs.Clear();
+        if (dto.Faqs is not null && dto.Faqs.Count > 0)
+        {
+            foreach (var f in dto.Faqs)
+                c.Faqs.Add(new Faq { Question = f.Question, Answer = f.Answer });
+        }
+
+        await _db.SaveChangesAsync();
+        return await GetOwnedCourseAsync(instructorId, c.Id);
+    }
+
+    // ------------------ SECTION ------------------
+    public async Task<SectionDtoSimple> CreateSectionAsync(Guid instructorId, Guid courseId, SectionUpsertDto dto)
+    {
+        var course = await _db.Courses.SingleOrDefaultAsync(c => c.Id == courseId)
+            ?? throw new KeyNotFoundException("Course not found.");
+        if (course.InstructorId != instructorId) throw new UnauthorizedAccessException();
+
+        var s = new Section
+        {
+            CourseId = courseId,
+            Title = dto.Title,
+            ShortDescription = dto.ShortDescription,
+            Description = dto.Description
+        };
+        _db.Sections.Add(s);
+        await _db.SaveChangesAsync();
+
+        return new SectionDtoSimple
+        {
+            Id = s.Id,
+            CourseId = courseId,
+            Title = s.Title,
+            ShortDescription = s.ShortDescription,
+            Description = s.Description
+        };
+    }
+
+    public async Task<SectionDtoSimple> UpdateSectionAsync(Guid instructorId, int sectionId, SectionUpsertDto dto)
+    {
+        var s = await _db.Sections
+            .Include(x => x.Course)
+            .SingleOrDefaultAsync(x => x.Id == sectionId)
+            ?? throw new KeyNotFoundException("Section not found.");
+        if (s.Course.InstructorId != instructorId) throw new UnauthorizedAccessException();
+
+        s.Title = dto.Title;
+        s.ShortDescription = dto.ShortDescription;
+        s.Description = dto.Description;
+        await _db.SaveChangesAsync();
+
+        return new SectionDtoSimple
+        {
+            Id = s.Id,
+            CourseId = s.CourseId,
+            Title = s.Title,
+            ShortDescription = s.ShortDescription,
+            Description = s.Description
+        };
+    }
+
+    // ------------------ LESSON ------------------
+    public async Task<LessonDtoSimple> CreateLessonAsync(Guid instructorId, int sectionId, LessonUpsertDto dto)
+    {
+        var section = await _db.Sections
+            .Include(x => x.Course)
+            .SingleOrDefaultAsync(x => x.Id == sectionId)
+            ?? throw new KeyNotFoundException("Section not found.");
+        if (section.Course.InstructorId != instructorId) throw new UnauthorizedAccessException();
+
+        var l = new Lesson
+        {
+            SectionId = sectionId,
+            Title = dto.Title,
+            Description = dto.Description,
+            VideoUrl = dto.VideoUrl
+        };
+        _db.Lessons.Add(l);
+        await _db.SaveChangesAsync();
+
+        return new LessonDtoSimple
+        {
+            Id = l.Id,
+            SectionId = sectionId,
+            Title = l.Title,
+            Description = l.Description,
+            VideoUrl = l.VideoUrl
+        };
+    }
+
+    public async Task<LessonDtoSimple> UpdateLessonAsync(Guid instructorId, int lessonId, LessonUpsertDto dto)
+    {
+        var l = await _db.Lessons
+            .Include(x => x.Section).ThenInclude(s => s.Course)
+            .SingleOrDefaultAsync(x => x.Id == lessonId)
+            ?? throw new KeyNotFoundException("Lesson not found.");
+        if (l.Section.Course.InstructorId != instructorId) throw new UnauthorizedAccessException();
+
+        l.Title = dto.Title;
+        l.Description = dto.Description;
+        l.VideoUrl = dto.VideoUrl;
+        await _db.SaveChangesAsync();
+
+        return new LessonDtoSimple
+        {
+            Id = l.Id,
+            SectionId = l.SectionId,
+            Title = l.Title,
+            Description = l.Description,
+            VideoUrl = l.VideoUrl
+        };
+    }
+
+    // -----------------------------------------------------------------------------------------------
     public async Task<List<EnrollmentStudentDto>> GetOwnedCourseStudentsAsync(Guid instructorId, Guid courseId)
     {
         var ok = await _db.Courses.AnyAsync(c => c.Id == courseId && c.InstructorId == instructorId);

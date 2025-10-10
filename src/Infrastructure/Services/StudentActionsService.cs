@@ -9,7 +9,6 @@ namespace Infrastructure.Services;
 public interface IStudentActionsService
 {
     Task EnrollAsync(Guid studentId, Guid courseId);
-    Task<List<EnrollmentItemDto>> ListMyEnrollmentsAsync(Guid studentId);
     Task CancelEnrollmentAsync(Guid studentId, Guid courseId); // soft cancel
     Task CreateOrUpdateReviewAsync(Guid studentId, ReviewCreateDto dto);
     Task SubmitAttachmentAsync(Guid studentId, StudentAttachmentCreateDto dto);
@@ -44,24 +43,6 @@ public class StudentActionsService : IStudentActionsService
         // else already active -> no-op
     }
 
-    public async Task<List<EnrollmentItemDto>> ListMyEnrollmentsAsync(Guid studentId)
-    {
-        var q = from e in _db.CoursesStudents
-                join c in _db.Courses on e.CourseId equals c.Id
-                where e.StudentId == studentId
-                orderby e.EnrolledAt descending
-                select new EnrollmentItemDto
-                {
-                    CourseId = c.Id,
-                    CourseTitle = c.Title,
-                    CourseSlug = c.Slug,
-                    ThumbnailUrl = c.ThumbnailUrl,
-                    Status = e.Status,
-                    EnrolledAt = e.EnrolledAt
-                };
-        return await q.ToListAsync();
-    }
-
     public async Task CancelEnrollmentAsync(Guid studentId, Guid courseId)
     {
         var e = await _db.CoursesStudents.FindAsync(studentId, courseId);
@@ -70,6 +51,7 @@ public class StudentActionsService : IStudentActionsService
         await _db.SaveChangesAsync();
     }
 
+    // -----------------------------------------------------------------------------------------------
     public async Task CreateOrUpdateReviewAsync(Guid studentId, ReviewCreateDto dto)
     {
         // single review per (student, course) enforced by unique index

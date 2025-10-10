@@ -24,10 +24,6 @@ public class EnrollmentsController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("my")]
-    public async Task<ActionResult<List<EnrollmentItemDto>>> My()
-        => Ok(await _svc.ListMyEnrollmentsAsync(UserId));
-
     // Documented choice: soft-cancel (status="cancelled"), not hard delete
     [HttpDelete("{courseId:guid}")]
     public async Task<IActionResult> Cancel(Guid courseId)
