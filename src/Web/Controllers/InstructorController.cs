@@ -18,36 +18,72 @@ public class InstructorController : ControllerBase
 
     private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
 
-    [HttpPost("courses")]
-    public async Task<ActionResult<CourseDetailsDto>> CreateCourse([FromBody] CourseCreateDto dto)
+    [HttpGet("courses/{courseId:guid}")]
+    public async Task<ActionResult<CourseDetailsDto>> GetOwnedCourse(Guid courseId)
     {
-        new CourseCreateDtoValidator().ValidateAndThrow(dto);
-        var res = await _svc.CreateCourseAsync(UserId, dto);
+        var res = await _svc.GetOwnedCourseAsync(UserId, courseId);
         return Ok(res);
     }
 
-    [HttpPut("courses/{id:guid}")]
-    public async Task<ActionResult<CourseDetailsDto>> UpdateCourse(Guid id, [FromBody] CourseUpdateDto dto)
+    // 1) Create course (simple)
+    [HttpPost("courses/simple")]
+    public async Task<ActionResult<CourseDetailsDto>> CreateCourseSimple([FromBody] CourseSimpleUpsertDto dto)
     {
-        new CourseUpdateDtoValidator().ValidateAndThrow(dto);
-        var res = await _svc.UpdateCourseAsync(UserId, id, dto);
+        new CourseSimpleUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.CreateCourseSimpleAsync(UserId, dto);
         return Ok(res);
     }
 
-    // ****************************
-    [HttpGet("courses")]
-    public async Task<ActionResult<PagedResult<CourseListItemDto>>> MyCourses([FromQuery] int page = 1, [FromQuery] int pageSize = 12)
-        => Ok(await _svc.ListOwnedCoursesAsync(UserId, page, pageSize));
+    // 2) Edit course (simple)
+    [HttpPut("courses/{courseId:guid}/simple")]
+    public async Task<ActionResult<CourseDetailsDto>> UpdateCourseSimple(Guid courseId, [FromBody] CourseSimpleUpsertDto dto)
+    {
+        new CourseSimpleUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.UpdateCourseSimpleAsync(UserId, courseId, dto);
+        return Ok(res);
+    }
 
-    [HttpGet("courses/{id:guid}")]
-    public async Task<ActionResult<CourseDetailsDto>> MyCourse(Guid id)
-        => Ok(await _svc.GetOwnedCourseAsync(UserId, id));
-    // ****************************
+    // 3) Create section
+    [HttpPost("courses/{courseId:guid}/sections")]
+    public async Task<ActionResult<SectionDto>> CreateSection(Guid courseId, [FromBody] SectionUpsertDto dto)
+    {
+        new SectionUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.CreateSectionAsync(UserId, courseId, dto);
+        return Ok(res);
+    }
 
+    // 4) Edit section
+    [HttpPut("sections/{sectionId:int}")]
+    public async Task<ActionResult<SectionDto>> UpdateSection(int sectionId, [FromBody] SectionUpsertDto dto)
+    {
+        new SectionUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.UpdateSectionAsync(UserId, sectionId, dto);
+        return Ok(res);
+    }
+
+    // 5) Create lesson
+    [HttpPost("sections/{sectionId:int}/lessons")]
+    public async Task<ActionResult<LessonDto>> CreateLesson(int sectionId, [FromBody] LessonUpsertDto dto)
+    {
+        new LessonUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.CreateLessonAsync(UserId, sectionId, dto);
+        return Ok(res);
+    }
+
+    // 6) Edit lesson
+    [HttpPut("lessons/{lessonId:int}")]
+    public async Task<ActionResult<LessonDto>> UpdateLesson(int lessonId, [FromBody] LessonUpsertDto dto)
+    {
+        new LessonUpsertDtoValidator().ValidateAndThrow(dto);
+        var res = await _svc.UpdateLessonAsync(UserId, lessonId, dto);
+        return Ok(res);
+    }
+
+    // -----------------------------------------------------------------------------------------------
     [HttpGet("courses/{id:guid}/students")]
     public async Task<ActionResult<List<EnrollmentStudentDto>>> EnrolledStudents(Guid id)
         => Ok(await _svc.GetOwnedCourseStudentsAsync(UserId, id));
-
+    
     [HttpPut("attachments/{attachmentId:int}/grade")]
     public async Task<IActionResult> Grade(int attachmentId, [FromBody] GradeUpdateDto dto)
     {
